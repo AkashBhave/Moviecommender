@@ -5,7 +5,8 @@ import os
 import pandas as pd
 import numpy as np
 
-datasetName = ""
+datasetName = None
+ratingsFrame = None
 
 
 def getDataset(datasetType):
@@ -47,15 +48,23 @@ def downloadDataset(datasetURL, datasetName, datasetNewName):
     os.remove(datasetNewName + ".zip")
 
 
-def readCSV():
+def readData():
+    global ratingsFrame
+
     ratingsFrameCols = ["user_id", "movie_id", "rating"]
     ratingsFrame = pd.read_csv(datasetName + "/ratings.csv", sep=",", header=0, names=ratingsFrameCols, usecols=range(3))
     ratingsFrame = ratingsFrame.groupby("movie_id").agg({"rating": [np.size, np.mean]})
 
+def normalizeData():
+    global ratingsFrame
+
+    ratingsFrame['rating']['size'] = (ratingsFrame-ratingsFrame.min()) / (ratingsFrame.max() - ratingsFrame.min())
+    print(ratingsFrame.head())
 
 def main():
     getDataset("small")
-    readCSV()
+    readData()
+    normalizeData()
 
 if __name__ == '__main__':
     main()
