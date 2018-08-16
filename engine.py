@@ -7,6 +7,8 @@ import numpy as np
 
 datasetName = None
 ratingsFrame = None
+
+possibleGenres = ["Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
 genreFrame = None
 
 
@@ -60,21 +62,37 @@ def readRatingData():
 
     # Normalize the 'size' column to be between 0 (no one rated) and 1 (everyone rated) 
     ratingsFrame['size'] = (ratingsFrame-ratingsFrame.min()) / (ratingsFrame.max() - ratingsFrame.min())
-    print(ratingsFrame.head())
 
 def readGenreData():
     global genreFrame
-    genres = ["Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
 
     genreFrameCols = ["movie_id", "title", "genres"]
     genreFrame = pd.read_csv(datasetName + "/movies.csv", sep=",", header=0, names=genreFrameCols, usecols=range(3))
-    print(genreFrame.head())
+    genreFrame = genreFrame.astype("object")
+
+    genreFrame["genres"] = genreFrame["genres"].map(convertGenres)
+    print(genreFrame)
+    
+def convertGenres(g):
+    movieGenres = g.split("|")
+    movieGenresNew = []
+    for genre in possibleGenres:
+        if genre in movieGenres:
+            movieGenresNew.append(1)
+        else:
+            movieGenresNew.append(0)
+    return movieGenresNew
+
+def mergeData():
+    pass
+
 
 def main():
     getDataset("small")
 
     readRatingData()
     readGenreData()
+    mergeData()
 
 if __name__ == '__main__':
     main()
