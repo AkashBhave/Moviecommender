@@ -7,6 +7,7 @@ import numpy as np
 
 datasetName = None
 ratingsFrame = None
+genreFrame = None
 
 
 def getDataset(datasetType):
@@ -48,23 +49,32 @@ def downloadDataset(datasetURL, datasetName, datasetNewName):
     os.remove(datasetNewName + ".zip")
 
 
-def readData():
+def readRatingData():
     global ratingsFrame
 
     ratingsFrameCols = ["user_id", "movie_id", "rating"]
     ratingsFrame = pd.read_csv(datasetName + "/ratings.csv", sep=",", header=0, names=ratingsFrameCols, usecols=range(3))
-    ratingsFrame = ratingsFrame.groupby("movie_id").agg({"rating": [np.size, np.mean]})
 
-def normalizeData():
-    global ratingsFrame
+    ratingsFrame = ratingsFrame.groupby('movie_id').agg({'rating': [np.size, np.mean]})
+    ratingsFrame.columns = ratingsFrame.columns.droplevel(0)
 
-    ratingsFrame['rating']['size'] = (ratingsFrame-ratingsFrame.min()) / (ratingsFrame.max() - ratingsFrame.min())
+    # Normalize the 'size' column to be between 0 (no one rated) and 1 (everyone rated) 
+    ratingsFrame['size'] = (ratingsFrame-ratingsFrame.min()) / (ratingsFrame.max() - ratingsFrame.min())
     print(ratingsFrame.head())
+
+def readGenreData():
+    global genreFrame
+    genres = ["Action", "Adventure", "Animation", "Children's", "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror", "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"]
+
+    genreFrameCols = ["movie_id", "title", "genres"]
+    genreFrame = pd.read_csv(datasetName + "/movies.csv", sep=",", header=0, names=genreFrameCols, usecols=range(3))
+    print(genreFrame.head())
 
 def main():
     getDataset("small")
-    readData()
-    normalizeData()
+
+    readRatingData()
+    readGenreData()
 
 if __name__ == '__main__':
     main()
