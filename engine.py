@@ -4,6 +4,7 @@ import os
 
 import pandas as pd
 import numpy as np
+from scipy import spatial
 
 datasetName = None
 
@@ -96,8 +97,17 @@ def mergeData():
     dataFrame = pd.DataFrame(index=genreFrame.index)
 
     dataFrame[["title", "genres"]] = genreFrame[["title", "genres"]].copy()
-    dataFrame[["size", "mean"]] = ratingsFrame[["size", "mean"]].copy()
+    dataFrame[["popularity", "rating"]] = ratingsFrame[["size", "mean"]].copy()
 
+
+def calcDistance(movieAID, movieBID):
+    movieA = dataFrame.loc[movieAID]
+    movieB = dataFrame.loc[movieBID]
+    
+    genreDistance = spatial.distance.cosine(movieA["genres"], movieB["genres"])
+    popularityDistance = abs(movieA["popularity"] - movieB["popularity"])
+
+    return (genreDistance + popularityDistance)
 
 def main():
     getDataset("small")
