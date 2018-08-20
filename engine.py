@@ -107,7 +107,20 @@ def calcDistance(movieAID, movieBID):
     genreDistance = spatial.distance.cosine(movieA["genres"], movieB["genres"])
     popularityDistance = abs(movieA["popularity"] - movieB["popularity"])
 
-    return (genreDistance + popularityDistance)
+    return (genreDistance * 0.8) + (popularityDistance * 0.2)
+
+def getKNeighbors(movieID, k):
+    neighbors = []
+    kNeighbors = []
+    for otherMovieID, row in dataFrame.iterrows():
+        if (movieID != otherMovieID):
+            distance = calcDistance(movieID, otherMovieID)
+            neighbors.append((otherMovieID, float(distance)))
+    neighbors.sort(key=lambda tup: tup[1])
+    for x in range(k):
+        kNeighbors.append(neighbors[x])
+    return kNeighbors
+
 
 def main():
     getDataset("small")
@@ -115,7 +128,8 @@ def main():
     readRatingData()
     readGenreData()
     mergeData()
-
+   
+    results = getKNeighbors(1, 10)
 
 if __name__ == '__main__':
     main()
